@@ -1,0 +1,22 @@
+{
+    "name": "silverslice/docx-template",
+    "description": "Replace words in docx document",
+    "keywords": ["docx", "template"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Igor Mikheev",
+            "email": "silver_slice@mail.ru"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "ext-zip": "*"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "Silverslice\\DocxTemplate\\": "src/"
+        }
+    }
+}
