@@ -1,6 +1,6 @@
 {
     "name": "silverslice/docx-template",
-    "description": "Replace words in docx document",
+    "description": "Replace variables in docx document",
     "keywords": ["docx", "template"],
     "license": "MIT",
     "authors": [
@@ -13,10 +13,17 @@
         "php": ">=5.4",
         "ext-zip": "*"
     },
-
+    "require-dev": {
+        "phpunit/phpunit": "~4.4"
+    },
     "autoload": {
         "psr-4": {
             "Silverslice\\DocxTemplate\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Silverslice\\DocxTemplate\\Tests\\": "tests/"
         }
     }
 }

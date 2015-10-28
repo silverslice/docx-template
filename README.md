@@ -1,11 +1,13 @@
-Easy tool for replacing words in docx documents
+Easy tool for replacing variables in docx documents
 ============================================================
 
 ## Install
 
 `composer require silverslice/docx-template`
 
-## Example of usage
+## Usage
+
+Place variables in your docx-document as {foo}. Then replace them with `replace` method.
 
 ```php
 
@@ -18,14 +20,11 @@ $template = new Template();
 // open docx file
 $template->open('test.docx')
 
-    // replace one string to another
-    ->replace('{one}', 'two')
+    // replace one variable to another
+    ->replace('one', 'two')
 
     // replace once more
     ->replace('foo', 'bar')
-
-    // you can replace multiple values too
-    ->replace(['big', 'dog'], ['small', 'cat'])
 
     // save docx document
     ->save('test.docx');

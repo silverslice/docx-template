@@ -4,13 +4,18 @@ namespace Silverslice\DocxTemplate;
 
 class Template
 {
-    /** @var Zip */
+    /** @var \ZipArchive */
     protected $zip;
 
     /**
-     * @var string Temporary directory for unzipped files
+     * @var string Temporary directory for docx file
      */
     protected $tempDir;
+
+    /**
+     * @var string Temporary docx file
+     */
+    protected $tempFilename;
 
     /**
      * @var string Contents of document.xml file
@@ -19,7 +24,7 @@ class Template
 
     public function __construct()
     {
-        $this->zip = new Zip();
+        $this->zip = new \ZipArchive();
     }
 
     /**
@@ -37,23 +42,33 @@ class Template
             throw new \Exception("File $file not found");
         }
 
-        $dir = $this->getTempDir();
-        $this->zip->extract($file, $dir);
+        $this->tempFilename = tempnam($this->getTempDir(), 'docx');
+        if (!copy($file, $this->tempFilename)) {
+            throw new \Exception("Cannot copy file to temporary directory");
+        }
+
+        $res = $this->zip->open($this->tempFilename);
+        if ($res !== true) {
+            unlink($this->tempFilename);
+            throw new \Exception("Unable to unpack docx file");
+        }
 
         return $this;
     }
 
     /**
-     * Replaces all occurrences of the search string with the replacement string in document
+     * Replaces all occurrences of the search variable with the replacement string in document
      *
-     * @param string $search  The value being searched for. An array may be used to designate multiple needles
-     * @param string $replace The replacement value that replaces found search values. An array may be used to designate multiple replacements
+     * @param string $var     The variable being searched for
+     * @param string $replace The replacement value that replaces found search variables
      * @return $this
      */
-    public function replace($search, $replace)
+    public function replace($var, $replace)
     {
+        $var = '{' . $var . '}';
+
         $contents = $this->getDocumentContents();
-        $this->contents = str_replace($search, $replace, $contents);
+        $this->contents = str_replace($var, $replace, $contents);
 
         return $this;
     }
@@ -63,18 +78,20 @@ class Template
      *
      * @param $filename
      *
-     * @return bool
+     * @throws \Exception
      */
     public function save($filename)
     {
         if (isset($this->contents)) {
-            file_put_contents($this->tempDir . '/word/document.xml', $this->contents);
+            $this->zip->addFromString('word/document.xml', $this->contents);
         }
 
-        $res = $this->zip->archive($this->tempDir, $filename);
-        (new FileHelper())->removeDirectory($this->tempDir);
+        $this->zip->close();
 
-        return $res;
+        $res = @rename($this->tempFilename, $filename);
+        if (!$res) {
+            throw new \Exception("Unable to save file");
+        }
     }
 
     /**
@@ -100,7 +117,7 @@ class Template
     protected function getTempDir()
     {
         if (!isset($this->tempDir)) {
-            $this->tempDir = sys_get_temp_dir() . '/' . uniqid('docx');
+            $this->tempDir = sys_get_temp_dir();
         }
 
         return $this->tempDir;
@@ -109,9 +126,28 @@ class Template
     protected function getDocumentContents()
     {
         if (!isset($this->contents)) {
-            $this->contents = file_get_contents($this->tempDir . '/word/document.xml');
+            $this->contents = $this->joinVariables($this->zip->getFromName('word/document.xml'));
         }
 
         return $this->contents;
+    }
+
+    /**
+     * Join variables split by Microsoft Word into several tags
+     *
+     * @param $contents
+     * @return mixed
+     */
+    protected function joinVariables($contents)
+    {
+        $contents = preg_replace_callback(
+            '#\{([^\}]+)\}#U',
+            function ($match) {
+                return strip_tags($match[0]);
+            },
+            $contents
+        );
+
+        return $contents;
     }
 }
