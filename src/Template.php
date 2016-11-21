@@ -22,8 +22,12 @@ class Template
      */
     protected $contents;
 
-    public function __construct()
+    public function __construct($tempDir = null)
     {
+        if ($tempDir && is_dir($tempDir)) {
+            $this->tempDir = $tempDir;
+        }
+
         $this->zip = new \ZipArchive();
     }
 
