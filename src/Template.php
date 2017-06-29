@@ -22,6 +22,11 @@ class Template
      */
     protected $contents;
 
+    /**
+     * @var string Footer of footer1.xml file
+     */
+    protected $footer;
+
     public function __construct()
     {
         $this->zip = new \ZipArchive();
@@ -67,8 +72,12 @@ class Template
     {
         $var = '{' . $var . '}';
 
+        //Contents
         $contents = $this->getDocumentContents();
         $this->contents = str_replace($var, $replace, $contents);
+        //Footer
+        $footers = $this->getFooterContents();
+        $this->footer = str_replace($var, $replace, $footers);
 
         return $this;
     }
@@ -84,6 +93,10 @@ class Template
     {
         if (isset($this->contents)) {
             $this->zip->addFromString('word/document.xml', $this->contents);
+        }
+
+        if (isset($this->footer)) {
+            $this->zip->addFromString('word/footer1.xml', $this->footer);
         }
 
         $this->zip->close();
@@ -130,6 +143,15 @@ class Template
         }
 
         return $this->contents;
+    }
+
+    protected function getFooterContents()
+    {
+        if (!isset($this->footer)) {
+            $this->footer = $this->joinVariables($this->zip->getFromName('word/footer1.xml'));
+        }
+
+        return $this->footer;
     }
 
     /**
