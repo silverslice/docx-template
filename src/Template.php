@@ -83,6 +83,20 @@ class Template
     }
 
     /**
+     * Replaces all occurrences of the search variable with the replacement multiline string in document
+     *
+     * @param string $var     The variable being searched for
+     * @param string $replace The replacement value that replaces found search variables
+     * @return $this
+     */
+    public function replaceMultiline($var, $replace)
+    {
+        $replace = $this->prepareMultilineString($replace);
+
+        return $this->replace($var, $replace);
+    }
+
+    /**
      * Saves file
      *
      * @param $filename
@@ -171,5 +185,13 @@ class Template
         );
 
         return $contents;
+    }
+
+    protected function prepareMultilineString($string)
+    {
+        $lines = explode("\n", $string);
+        $str = implode('</w:t><w:br/><w:t>', $lines);
+
+        return $str;
     }
 }

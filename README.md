@@ -7,7 +7,7 @@ Easy tool for replacing variables in docx documents
 
 ## Usage
 
-Place variables in your docx-document as {foo}. Then replace them with `replace` method.
+Place variables in your docx-document as {foo}. Then replace them with `replace` method. Use `replaceMultiline` to replace variables with multiline strings.
 
 ```php
 
@@ -25,6 +25,11 @@ $template->open('test.docx')
 
     // replace once more
     ->replace('foo', 'bar')
+    
+    // replace with multiline string 
+    ->replaceMultiline('foo', 'one
+        two
+        three')
 
     // save docx document
     ->save('test.docx');

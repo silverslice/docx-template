@@ -33,7 +33,7 @@ class TemplateTest extends \PHPUnit_Framework_TestCase
         if (!is_dir(__DIR__ . '/output')) {
             mkdir(__DIR__ . '/output');
         }
-        $replacedFile = __DIR__ . '/output/test2.docx';
+        $replacedFile = __DIR__ . '/output/test.docx';
 
         $template = new Template();
 
@@ -50,6 +50,30 @@ class TemplateTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(2, substr_count($contents, '#Composer#'));
         $this->assertEquals(1, substr_count($contents, '#management#'));
         $this->assertEquals(2, substr_count($contents, '#libraries#'));
+    }
+
+    public function testReplaceMultiline()
+    {
+        if (!is_dir(__DIR__ . '/output')) {
+            mkdir(__DIR__ . '/output');
+        }
+        $replacedFile = __DIR__ . '/output/test_multiline.docx';
+
+        $template = new Template();
+
+        $string = 'One line
+Two line
+Three';
+
+        $template
+            ->open(__DIR__ . '/test.docx')
+            ->replaceMultiline('lines', $string)
+            ->save($replacedFile);
+
+        $this->assertFileExists($replacedFile);
+
+        $contents = $this->getDocxContents($replacedFile);
+        $this->assertEquals(1, substr_count($contents, 'One line</w:t><w:br/>'));
     }
 
     protected function getDocxContents($file)
