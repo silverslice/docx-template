@@ -66,11 +66,16 @@ class Template
      *
      * @param string $var     The variable being searched for
      * @param string $replace The replacement value that replaces found search variables
+     * @param bool $escape    Escape special xml symbols
      * @return $this
      */
-    public function replace($var, $replace)
+    public function replace($var, $replace, $escape = true)
     {
         $var = '{' . $var . '}';
+
+        if ($escape) {
+            $replace = htmlspecialchars($replace, ENT_QUOTES);
+        }
 
         //Contents
         $contents = $this->getDocumentContents();
@@ -87,13 +92,14 @@ class Template
      *
      * @param string $var     The variable being searched for
      * @param string $replace The replacement value that replaces found search variables
+     * @param bool $escape    Escape special xml symbols
      * @return $this
      */
-    public function replaceMultiline($var, $replace)
+    public function replaceMultiline($var, $replace, $escape = true)
     {
-        $replace = $this->prepareMultilineString($replace);
+        $replace = $this->prepareMultilineString($replace, $escape);
 
-        return $this->replace($var, $replace);
+        return $this->replace($var, $replace, false);
     }
 
     /**
@@ -172,26 +178,25 @@ class Template
      * Join variables split by Microsoft Word into several tags
      *
      * @param $contents
-     * @return mixed
+     * @return string
      */
     protected function joinVariables($contents)
     {
-        $contents = preg_replace_callback(
+        return preg_replace_callback(
             '#\{([^\}]+)\}#U',
             function ($match) {
                 return strip_tags($match[0]);
             },
             $contents
         );
-
-        return $contents;
     }
 
-    protected function prepareMultilineString($string)
+    protected function prepareMultilineString($string, $escape)
     {
+        if ($escape) {
+            $string = htmlspecialchars($string, ENT_QUOTES);
+        }
         $lines = explode("\n", $string);
-        $str = implode('</w:t><w:br/><w:t>', $lines);
-
-        return $str;
+        return implode('</w:t><w:br/><w:t>', $lines);
     }
 }

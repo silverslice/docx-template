@@ -2,25 +2,22 @@
 
 namespace Silverslice\DocxTemplate\Tests;
 
+use PHPUnit\Framework\TestCase;
 use Silverslice\DocxTemplate\Template;
 
-class TemplateTest extends \PHPUnit_Framework_TestCase
+class TemplateTest extends TestCase
 {
-    /**
-     * @expectedException \Exception
-     */
     public function testOpenFail()
     {
+        $this->expectException(\Exception::class);
         $template = new Template();
 
         $template->open('testFail.docx');
     }
 
-    /**
-     * @expectedException \Exception
-     */
     public function testSaveFail()
     {
+        $this->expectException(\Exception::class);
         $template = new Template();
 
         $template
@@ -40,7 +37,7 @@ class TemplateTest extends \PHPUnit_Framework_TestCase
         $template
             ->open(__DIR__ . '/test.docx')
             ->replace('name', '#Composer#')
-            ->replace('head', '#management#')
+            ->replace('head', '#management & marketing#')
             ->replace('library', '#libraries#')
             ->save($replacedFile);
 
@@ -48,7 +45,7 @@ class TemplateTest extends \PHPUnit_Framework_TestCase
 
         $contents = $this->getDocxContents($replacedFile);
         $this->assertEquals(2, substr_count($contents, '#Composer#'));
-        $this->assertEquals(1, substr_count($contents, '#management#'));
+        $this->assertEquals(1, substr_count($contents, '#management &amp; marketing#'));
         $this->assertEquals(2, substr_count($contents, '#libraries#'));
     }
 
@@ -62,7 +59,7 @@ class TemplateTest extends \PHPUnit_Framework_TestCase
         $template = new Template();
 
         $string = 'One line
-Two line
+Two < line
 Three';
 
         $template
@@ -74,6 +71,7 @@ Three';
 
         $contents = $this->getDocxContents($replacedFile);
         $this->assertEquals(1, substr_count($contents, 'One line</w:t><w:br/>'));
+        $this->assertEquals(1, substr_count($contents, 'Two &lt; line</w:t><w:br/>'));
     }
 
     protected function getDocxContents($file)
