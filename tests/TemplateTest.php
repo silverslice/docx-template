@@ -74,6 +74,45 @@ Three';
         $this->assertEquals(1, substr_count($contents, 'Two &lt; line</w:t><w:br/>'));
     }
 
+    public function testReplaceNull()
+    {
+        error_reporting(E_ALL);
+        if (!is_dir(__DIR__ . '/output')) {
+            mkdir(__DIR__ . '/output');
+        }
+        $replacedFile = __DIR__ . '/output/test_null.docx';
+
+        $template = new Template();
+
+        $val = null;
+        $template
+            ->open(__DIR__ . '/test.docx')
+            ->replace('name', $val)
+            ->save($replacedFile);
+
+        $this->assertFileExists($replacedFile);
+    }
+
+    public function testReplaceMultilineNull()
+    {
+        error_reporting(E_ALL);
+        if (!is_dir(__DIR__ . '/output')) {
+            mkdir(__DIR__ . '/output');
+        }
+        $replacedFile = __DIR__ . '/output/test_multiline_null.docx';
+
+        $template = new Template();
+
+        $string = null;
+
+        $template
+            ->open(__DIR__ . '/test.docx')
+            ->replaceMultiline('lines', $string)
+            ->save($replacedFile);
+
+        $this->assertFileExists($replacedFile);
+    }
+
     protected function getDocxContents($file)
     {
         $zip = new \ZipArchive();

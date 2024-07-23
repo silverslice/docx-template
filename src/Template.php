@@ -72,6 +72,9 @@ class Template
     public function replace($var, $replace, $escape = true)
     {
         $var = '{' . $var . '}';
+        if (is_null($replace)) {
+            $replace = '';
+        }
 
         if ($escape) {
             $replace = htmlspecialchars($replace, ENT_QUOTES);
@@ -97,6 +100,10 @@ class Template
      */
     public function replaceMultiline($var, $replace, $escape = true)
     {
+        if (is_null($replace)) {
+            $replace = '';
+        }
+
         $replace = $this->prepareMultilineString($replace, $escape);
 
         return $this->replace($var, $replace, false);
